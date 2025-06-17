@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor de Imagen - Sistema de Albaranes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    /* Estilos para el login */
+    .login-container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: 50px auto;
+      text-align: center;
+    }
+    
+    .login-container h1 {
+      color: #007cba;
+      margin-bottom: 30px;
+    }
+    
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .login-form input {
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    
+    .login-form button {
+      padding: 12px;
+      background: #007cba;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    .login-form button:hover {
+      background: #005a87;
+    }
+    
+    .error-message {
+      color: #d32f2f;
+      margin-top: 10px;
+      padding: 10px;
+      background: #ffebee;
+      border-radius: 5px;
+    }
+    
+    /* Estilos para la aplicación principal */
+    .main-app {
+      display: none;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    
+    .user-info {
+      background: #e3f2fd;
+      padding: 10px 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .user-info .user-details {
+      color: #1976d2;
+      font-weight: bold;
+    }
+    
+    .logout-btn {
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    
+    .logout-btn:hover {
+      background: #d32f2f;
+    }
+    
+    canvas {
+      border: 1px solid #ccc;
+      max-width: 100%;
+      height: auto;
+    }
+    
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    input, select {
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+    
+    button {
+      padding: 10px 20px;
+      background: #007cba;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    
+    button:hover {
+      background: #005a87;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    h2 {
+      grid-column: 1 / -1;
+      color: #333;
+      border-bottom: 2px solid #007cba;
+      padding-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Pantalla de Login -->
+  <div id="loginScreen" class="login-container">
+    <h1>🏢 Sistema de Albaranes</h1>
+    <form class="login-form" id="loginForm">
+      <input type="text" id="username" placeholder="Usuario" required>
+      <input type="password" id="password" placeholder="Contraseña" required>
+      <button type="submit">Iniciar Sesión</button>
+    </form>
+    <div id="loginError" class="error-message" style="display: none;"></div>
+  </div>
+
+  <!-- Aplicación Principal -->
+  <div id="mainApp" class="main-app">
+    <!-- Información del usuario -->
+    <div class="user-info">
+      <div class="user-details">
+        <span id="currentUser"></span> - <span id="loginTime"></span>
+      </div>
+      <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+    </div>
+
+    <h1>Rellenar Albarán</h1>
+
+    <!-- Cargar imagen -->
+    <input type="file" id="imageUpload" accept="image/*" />
+
+    <!-- Canvas donde se dibuja la imagen y el texto -->
+    <canvas id="canvas" style="display:block; margin:2rem 0;"></canvas>
+
+    <!-- Formulario -->
+    <form id="formulario">
+      <div class="form-group">
+        <label for="cliente">Cliente:</label>
+        <input type="text" id="cliente" name="cliente" required>
+      </div>
+
+      <div class="form-group">
+        <label for="telefono">Teléfono:</label>
+        <input type="text" id="telefono" name="telefono">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email">
+      </div>
+
+      <div class="form-group">
+        <label for="pasajero">Nº Pax:</label>
+        <input type="text" id="pasajero" name="pasajero">
+      </div>
+
+      <div class="form-group">
+        <label for="origen">Origen:</label>
+        <input type="text" id="origen" name="origen">
+      </div>
+
+      <div class="form-group">
+        <label for="destino">Destino:</label>
+        <input type="text" id="destino" name="destino">
+      </div>
+
+      <div class="form-group">
+        <label for="fechaSalida">Fecha de Salida Origen:</label>
+        <input type="date" id="fechaSalida" name="fechaSalida">
+      </div>
+
+      <div class="form-group">
+        <label for="fechaDestino">Fecha de Salida Destino:</label>
+        <input type="date" id="fechaDestino" name="fechaDestino">
+      </div>
+
+      <div class="form-group">
+        <label for="localizador">Localizador:</label>
+        <input type="text" id="localizador" name="localizador">
+      </div>
+
+      <div class="form-group">
+        <label for="dni">DNI/NIE/PP:</label>
+        <input type="text" id="dni" name="dni">
+      </div>
+
+      <div class="form-group">
+        <label for="m">M:</label>
+        <input type="text" id="m" name="m">
+      </div>
+
+      <div class="form-group">
+        <label for="agente">Agente:</label>
+        <input type="text" id="agente" name="agente">
+      </div>
+
+      <div class="form-group">
+        <label for="fecha">Fecha:</label>
+        <input type="date" id="fecha" name="fecha">
+      </div>
+
+      <div class="form-group">
+        <label for="detalles">Detalles:</label>
+        <input type="text" id="detalles" name="detalles">
+      </div>
+
+      <div class="form-group">
+        <label for="importe">Importe:</label>
+        <input type="text" id="importe" name="importe">
+      </div>
+      
+      <div class="form-group">
+        <label for="agenteR">Financiación</label>
+        <input type="text" id="agenteR" name="agenteR">
+      </div>
+
+      <div class="form-group">
+        <label for="importeTotal">Importe Total:</label>
+        <input type="text" id="importeTotal" name="importeTotal">
+      </div>
+
+      <div class="form-group">
+        <label for="importeAbonado">Importe Abonado:</label>
+        <input type="text" id="importeAbonado" name="importeAbonado">
+      </div>
+
+      <div class="form-group">
+        <label for="importeRestante">Importe Restante:</label>
+        <input type="text" id="importeRestante" name="importeRestante">
+      </div>
+
+      <div class="form-group">
+        <label for="nmaletas">Nº maletas:</label>
+        <input type="text" id="nmaletas" name="nmaletas">
+      </div>
+
+      <div class="form-group">
+        <label for="hotel">Hotel:</label>
+        <input type="checkbox" id="hotel" name="hotel">
+      </div>
+
+      <div class="form-group">
+        <label for="seguroSalud">Seguro Viaje Salud:</label>
+        <input type="checkbox" id="seguroSalud" name="seguroSalud">
+      </div>
+
+      <h2>Financiación</h2>
+      <div class="form-group">
+        <label for="fechaPago">Fecha de Pago:</label>
+        <input type="date" id="fechaPago" name="fechaPago">
+      </div>
+
+      <div class="form-group">
+        <label for="cantidad">Cantidad:</label>
+        <input type="number" id="cantidad" name="cantidad">
+      </div>
+
+      <div class="form-group">
+        <label for="seguroBillete">Seguro de billete cancelación:</label>
+        <input type="text" id="seguroBillete" name="seguroBillete">
+      </div>
+
+      <h2>Por el cliente</h2>
+
+      <div class="form-group">
+        <label for="lugarAbonar">Lugar donde abonan dinero:</label>
+        <input type="text" id="lugarAbonar" name="lugarAbonar">
+      </div>
+
+      <div class="form-group">
+        <label for="cuentaBancaria">Cuenta bancaria:</label>
+        <input type="text" id="cuentaBancaria" name="cuentaBancaria">
+      </div>
+
+      <div class="form-group">
+        <label for="agenteRecibe">Agente que lo recibe:</label>
+        <input type="text" id="agenteRecibe" name="agenteRecibe">
+      </div>
+
+      <div class="form-group">
+        <label for="cantidadCliente">Cantidad:</label>
+        <input type="text" id="cantidadCliente" name="cantidadCliente">
+      </div>
+
+      <div class="form-group">
+        <label for="fechaF">Fecha:</label>
+        <input type="text" id="fechaF" name="fechaF">
+      </div>
+
+      <button type="button" id="submitBtn">Enviar</button>
+    </form>
+
+    <!-- Controles -->
+    <div>
+      <button id="downloadBtn">Descargar Imagen</button>
+      <button id="adjustPositionsBtn">Ajustar Posiciones (Click en campos)</button>
+    </div>
+  </div>
+
+  <script>
+    // Variables globales para el usuario
+    let currentUser = null;
+    let loginTime = null;
+
+    // Variables del canvas y la aplicación
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let img = new Image();
+    let positions = [];
+    const TEXT_COLOR = "#001f3f";
+    const HIGHLIGHT_COLOR = "rgba(0, 31, 63, 0.3)";
+    let adjustMode = false;
+
+    let albaranNumber = 1;
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxFtupsp1Qxko7AsbRf8GWEWUJSnkY2BLCpCKLJdWjJ0Zugj6vKcaxREcwd-9TbjDpp/exec';
+
+    // --- SISTEMA DE LOGIN ---
+    
+    // Manejar el formulario de login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      
+      try {
+        const result = await authenticateUser(username, password);
+        if (result.success) {
+          currentUser = result.userInfo;
+          loginTime = new Date().toLocaleString('es-ES');
+          showMainApp();
+          await getNextAlbaranNumber();
+        } else {
+          showLoginError(result.message);
+        }
+      } catch (error) {
+        showLoginError('Error de conexión. Inténtalo de nuevo.');
+      }
+    });
+
+    // Función para autenticar usuario
+    async function authenticateUser(username, password) {
+      try {
+        const response = await fetch(`${WEB_APP_URL}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error en autenticación:', error);
+        return { success: false, message: 'Error de conexión' };
+      }
+    }
+
+    // Mostrar error de login
+    function showLoginError(message) {
+      const errorDiv = document.getElementById('loginError');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      setTimeout(() => {
+        errorDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    // Mostrar aplicación principal
+    function showMainApp() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+      document.getElementById('currentUser').textContent = `Usuario: ${currentUser.nombre} (${currentUser.username})`;
+      document.getElementById('loginTime').textContent = `Conexión: ${loginTime}`;
+    }
+
+    // Función de logout
+    function logout() {
+      if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+        currentUser = null;
+        loginTime = null;
+        document.getElementById('loginScreen').style.display = 'block';
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('loginForm').reset();
+        document.getElementById('formulario').reset();
+      }
+    }
+
+    // --- RESTO DE LA APLICACIÓN (código original) ---
+
+    // Campos del formulario
+    const fields = [
+      'cliente','telefono','email','pasajero','origen','destino',
+      'fechaSalida','fechaDestino','localizador','dni','m','agente','fecha',
+      'detalles','importe','importeTotal','importeAbonado','importeRestante',
+      'nmaletas','hotel','seguroSalud','fechaPago','cantidad','seguroBillete',
+      'agenteR','lugarAbonar','cuentaBancaria','agenteRecibe','cantidadCliente','fechaF'
+    ];
+
+    // Posiciones de los campos
+    const fieldPositions = [
+      { name: 'cliente',         x: 200, y: 235, width: 400, height: 20 },
+      { name: 'telefono',        x: 200, y: 260, width: 200, height: 20 },
+      { name: 'email',           x: 180, y: 289, width: 300, height: 20 },
+      { name: 'pasajero',        x: 210, y: 360, width: 100, height: 20 },
+      { name: 'origen',          x: 585, y: 360, width: 200, height: 20 },
+      { name: 'destino',         x: 904, y: 360, width: 200, height: 20 },
+      { name: 'fechaSalida',     x: 315, y: 385, width: 150, height: 20 },
+      { name: 'fechaDestino',    x: 816, y: 385, width: 150, height: 20 },
+      { name: 'localizador',     x: 585, y: 260, width: 150, height: 20 },
+      { name: 'dni',             x: 904, y: 235, width: 200, height: 20 },
+      { name: 'm',               x: 850, y: 260, width: 100, height: 20 },
+      { name: 'agente',          x: 890, y: 289, width: 200, height: 20 },
+      { name: 'fecha',           x: 1000, y: 155, width: 120, height: 20 },
+      { name: 'detalles',        x: 180, y: 480, width: 500, height: 60 },
+      { name: 'importe',         x: 1020, y: 470, width: 100, height: 20 },
+      { name: 'importeTotal',    x: 1020, y: 550, width: 100, height: 20 },
+      { name: 'importeAbonado',  x: 1020, y: 580, width: 100, height: 20 },
+      { name: 'importeRestante', x: 1020, y: 615, width: 100, height: 20 },
+      { name: 'nmaletas',        x: 500, y: 615, width: 80, height: 20 },
+      { name: 'hotel',           x: 380, y: 615, width: 30, height: 20 },
+      { name: 'seguroSalud',     x: 700, y: 615, width: 30, height: 20 },
+      { name: 'fechaPago',       x: 720, y: 510, width: 100, height: 20 },
+      { name: 'cantidad',        x: 720, y: 550, width: 100, height: 20 },
+      { name: 'seguroBillete',   x: 720, y: 580, width: 30, height: 20 },
+      { name: 'agenteR',         x: 940, y: 700, width: 200, height: 20 },
+      { name: 'lugarAbonar',     x: 940, y: 720, width: 200, height: 20 },
+      { name: 'cuentaBancaria',  x: 940, y: 740, width: 200, height: 20 },
+      { name: 'agenteRecibe',    x: 940, y: 760, width: 200, height: 20 },
+      { name: 'cantidadCliente', x: 940, y: 780, width: 100, height: 20 },
+      { name: 'fechaF',          x: 940, y: 800, width: 120, height: 20 }
+    ];
+
+    // Función para obtener el siguiente número de albarán
+    async function getNextAlbaranNumber() {
+      try {
+        const response = await fetch(`${WEB_APP_URL}?action=getNextNumber`);
+        const data = await response.json();
+        
+        if (data.albaranNumber) {
+          albaranNumber = data.albaranNumber;
+          console.log("Siguiente número de albarán:", albaranNumber);
+          
+          if (img.src) {
+            drawText();
+          }
+          
+          return albaranNumber;
+        } else {
+          console.error('Error en la respuesta:', data);
+          return 1;
+        }
+      } catch (error) {
+        console.error('Error al obtener el número de albarán:', error);
+        return 1;
+      }
+    }
+
+    // Cargar la imagen seleccionada
+    document.getElementById('imageUpload').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            updatePositions();
+            drawText();
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Función para dibujar los recuadros azules para campos vacíos
+    function drawFieldsWithHighlight() {
+      fieldPositions.forEach(field => {
+        const fieldElement = document.getElementById(field.name);
+        let fieldValue = '';
+        
+        if (fieldElement) {
+          if (fieldElement.type === 'checkbox') {
+            fieldValue = fieldElement.checked ? 'Sí' : '';
+          } else {
+            fieldValue = fieldElement.value.trim();
+          }
+        }
+        
+        if (!fieldValue) {
+          ctx.fillStyle = HIGHLIGHT_COLOR;
+          ctx.fillRect(field.x, field.y - 15, field.width, field.height);
+          
+          ctx.strokeStyle = '#001f3f';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(field.x, field.y - 15, field.width, field.height);
+        }
+      });
+    }
+
+    // Función principal para dibujar texto
+    function drawText() {
+      if (!img.src) return;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      
+      drawFieldsWithHighlight();
+
+      ctx.font = "bold 16px Arial";
+      ctx.fillStyle = TEXT_COLOR;
+      ctx.fillText(`${albaranNumber}`, 1060, 77);
+
+      positions.forEach(pos => {
+        if (pos.text && pos.text.trim() !== '') {
+          ctx.fillStyle = TEXT_COLOR;
+          ctx.font = "14px Arial";
+          
+          if (pos.isDetails) {
+            const words = pos.text.split(' ');
+            let line = '';
+            let y = pos.y;
+            const maxWidth = 500;
+            const lineHeight = 16;
+            
+            for (let i = 0; i < words.length; i++) {
+              const testLine = line + words[i] + ' ';
+              const metrics = ctx.measureText(testLine);
+              const testWidth = metrics.width;
+              
+              if (testWidth > maxWidth && i > 0) {
+                ctx.fillText(line, pos.x, y);
+                line = words[i] + ' ';
+                y += lineHeight;
+              } else {
+                line = testLine;
+              }
+            }
+            ctx.fillText(line, pos.x, y);
+          } else {
+            ctx.fillText(pos.text, pos.x, pos.y);
+          }
+        }
+      });
+    }
+
+    // Función para actualizar posiciones
+    function updatePositions() {
+      positions = [];
+      
+      fieldPositions.forEach(field => {
+        const fieldElement = document.getElementById(field.name);
+        let fieldValue = '';
+        
+        if (fieldElement) {
+          if (fieldElement.type === 'checkbox') {
+            fieldValue = fieldElement.checked ? 'Sí' : '';
+          } else {
+            fieldValue = fieldElement.value.trim();
+          }
+        }
+        
+        positions.push({
+          x: field.x,
+          y: field.y,
+          text: fieldValue,
+          isDetails: field.name === 'detalles'
+        });
+      });
+    }
+
+    // Event listeners para actualizar automáticamente
+    document.addEventListener('DOMContentLoaded', () => {
+      fields.forEach(fieldName => {
+        const fieldElement = document.getElementById(fieldName);
+        if (fieldElement) {
+          fieldElement.addEventListener('input', () => {
+            if (img.src) {
+              updatePositions();
+              drawText();
+            }
+          });
+          
+          if (fieldElement.type === 'checkbox') {
+            fieldElement.addEventListener('change', () => {
+              if (img.src) {
+                updatePositions();
+                drawText();
+              }
+            });
+          }
+        }
+      });
+    });
+
+    // Modo de ajuste de posiciones
+    document.getElementById('adjustPositionsBtn').addEventListener('click', () => {
+      adjustMode = !adjustMode;
+      if (adjustMode) {
+        alert('Modo de ajuste activado. Haz click en el canvas donde quieres que aparezca cada campo. Presiona ESC para salir.');
+        canvas.style.cursor = 'crosshair';
+      } else {
+        canvas.style.cursor = 'default';
+      }
+    });
+
+    // Click en canvas para ajustar posiciones
+    canvas.addEventListener('click', (e) => {
+      if (!adjustMode) return;
+      
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      console.log(`Click en: x=${Math.round(x)}, y=${Math.round(y)}`);
+      alert(`Coordenadas: x=${Math.round(x)}, y=${Math.round(y)}\nRevisa la consola para copiar las coordenadas.`);
+    });
+
+    // Salir del modo de ajuste con ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && adjustMode) {
+        adjustMode = false;
+        canvas.style.cursor = 'default';
+      }
+    });
+
+    // Botón enviar
+    document.getElementById('submitBtn').addEventListener('click', async () => {
+      if (!img.src) {
+        alert("Primero debes subir una imagen.");
+        return;
+      }
+
+      const cliente = document.getElementById('cliente').value.trim();
+      if (!cliente) {
+        alert("El campo 'Cliente' es obligatorio.");
+        return;
+      }
+
+      updatePositions();
+      drawText();
+      
+      const result = await sendDataToGoogleSheets();
+      
+      if (result.success) {
+        alert(`Datos guardados correctamente. Albarán nº: ${albaranNumber}`);
+        document.getElementById('formulario').reset();
+        await getNextAlbaranNumber();
+        if (img.src) {
+          updatePositions();
+          drawText();
+        }
+      } else {
+        alert('Error al guardar los datos: ' + result.message);
+      }
+    });
+
+    // Descargar imagen
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      if (!img.src) {
+        alert("Primero debes subir una imagen antes de descargar.");
+        return;
+      }
+
+      const dataURL = canvas.toDataURL("image/png");
+      const link = document.createElement('a');
+      link.href = dataURL;
+      link.download = `albaran_${albaranNumber}.png`;
+      link.click();
+    });
+
+    // Función para enviar datos a Google Sheets (actualizada con datos de usuario)
+    async function sendDataToGoogleSheets() {
+      try {
+        const payload = {};
+        
+        fields.forEach(fieldName => {
+          const fieldElement = document.getElementById(fieldName);
+          if (fieldElement) {
+            if (fieldElement.type === 'checkbox') {
+              payload[fieldName] = fieldElement.checked ? 'Sí' : 'No';
+            } else {
+              payload[fieldName] = fieldElement.value.trim();
+            }
+          }
+        });
+
+        // Agregar datos del usuario
+        payload.usuario_registro = currentUser.username;
+        payload.nombre_usuario = currentUser.nombre;
+        payload.fecha_registro = new Date().toLocaleString('es-ES');
+
+        const response = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          body: new URLSearchParams(payload)
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          console.log('Datos enviados correctamente:', data);
+          return { success: true, albaranNumber: data.albaranNumber };
+        } else {
+          console.error('Error del servidor:', data);
+          return { success: false, message: data.message || 'Error desconocido' };
+        }
+        
+      } catch (error) {
+        console.error('Error al enviar a Google Sheets:', error);
+        return { success: false, message: error.toString() };
+      }
+    }
+  </script>
+</body>
+</html>
