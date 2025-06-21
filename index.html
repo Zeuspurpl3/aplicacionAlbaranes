@@ -4,9 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Editor de Imagen - Sistema de Albaranes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Montserrat', 'Roboto', Arial, sans-serif;
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
@@ -115,14 +117,21 @@
     }
     
     label {
-      font-weight: bold;
+      font-weight: 600;
       margin-bottom: 5px;
+      font-family: 'Montserrat', sans-serif;
     }
     
-    input, select {
-      padding: 5px;
+    input, select, textarea {
+      padding: 8px;
       border: 1px solid #ccc;
       border-radius: 3px;
+      font-family: 'Roboto', sans-serif;
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 80px;
     }
     
     button {
@@ -133,6 +142,8 @@
       border-radius: 5px;
       cursor: pointer;
       margin: 10px 5px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 500;
     }
     
     button:hover {
@@ -144,11 +155,56 @@
       flex-direction: column;
     }
     
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+    
     h2 {
       grid-column: 1 / -1;
       color: #333;
       border-bottom: 2px solid #007cba;
       padding-bottom: 5px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      margin: 0;
+    }
+
+    .checkbox-group label {
+      margin: 0;
+    }
+
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .status-message {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .status-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
     }
   </style>
 </head>
@@ -249,19 +305,24 @@
         <input type="date" id="fecha" name="fecha">
       </div>
 
-      <div class="form-group">
+      <div class="form-group full-width">
+        <label for="tipoAlbaran">Tipo de Albarán:</label>
+        <input type="text" id="tipoAlbaran" name="tipoAlbaran">
+      </div>
+
+      <div class="form-group full-width">
         <label for="detalles">Detalles:</label>
-        <input type="text" id="detalles" name="detalles">
+        <textarea id="detalles" name="detalles" rows="3" placeholder="Presiona Enter para hacer saltos de línea..."></textarea>
       </div>
 
       <div class="form-group">
         <label for="importe">Importe:</label>
         <input type="text" id="importe" name="importe">
       </div>
-      
+
       <div class="form-group">
-        <label for="agenteR">Financiación</label>
-        <input type="text" id="agenteR" name="agenteR">
+        <label for="importeFinanciacion">Importe Financiación:</label>
+        <input type="text" id="importeFinanciacion" name="importeFinanciacion">
       </div>
 
       <div class="form-group">
@@ -285,66 +346,77 @@
       </div>
 
       <div class="form-group">
-        <label for="hotel">Hotel:</label>
-        <input type="checkbox" id="hotel" name="hotel">
+        <div class="checkbox-group">
+          <input type="checkbox" id="hotelSi" name="hotelSi">
+          <label for="hotelSi">Hotel Sí</label>
+        </div>
+      </div>
+        
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="hotelNo" name="hotelNo">
+          <label for="hotelNo">Hotel No</label>
+        </div>
       </div>
 
       <div class="form-group">
-        <label for="seguroSalud">Seguro Viaje Salud:</label>
-        <input type="checkbox" id="seguroSalud" name="seguroSalud">
-      </div>
-
-      <h2>Financiación</h2>
-      <div class="form-group">
-        <label for="fechaPago">Fecha de Pago:</label>
-        <input type="date" id="fechaPago" name="fechaPago">
+        <div class="checkbox-group">
+          <input type="checkbox" id="seguroSaludSi" name="seguroSaludSi">
+          <label for="seguroSaludSi">Seguro Viaje Salud Sí</label>
+        </div>
       </div>
 
       <div class="form-group">
-        <label for="cantidad">Cantidad:</label>
-        <input type="number" id="cantidad" name="cantidad">
+        <div class="checkbox-group">
+          <input type="checkbox" id="seguroSaludNo" name="seguroSaludNo">
+          <label for="seguroSaludNo">Seguro Viaje Salud No</label>
+        </div>
+      </div>
+
+      <h2>Fecha + importe abonar</h2>
+
+      <div class="form-group">
+        <label for="fechaFinanciacion">Primer pago financiado:</label>
+        <input type="text" id="fechaFinanciacion" name="fechaFinanciacion">
       </div>
 
       <div class="form-group">
-        <label for="seguroBillete">Seguro de billete cancelación:</label>
-        <input type="text" id="seguroBillete" name="seguroBillete">
-      </div>
-
-      <h2>Por el cliente</h2>
-
-      <div class="form-group">
-        <label for="lugarAbonar">Lugar donde abonan dinero:</label>
-        <input type="text" id="lugarAbonar" name="lugarAbonar">
+        <label for="fechaTotal">Segundo pago financiado:</label>
+        <input type="text" id="fechaTotal" name="fechaTotal">
       </div>
 
       <div class="form-group">
-        <label for="cuentaBancaria">Cuenta bancaria:</label>
-        <input type="text" id="cuentaBancaria" name="cuentaBancaria">
+        <label for="fechaAbonado">Tercer pago financiado:</label>
+        <input type="text" id="fechaAbonado" name="fechaAbonado">
       </div>
 
-      <div class="form-group">
-        <label for="agenteRecibe">Agente que lo recibe:</label>
-        <input type="text" id="agenteRecibe" name="agenteRecibe">
+      <div class="form-group full-width">
+        <label for="observaciones">Concepto de Ingreso:</label>
+        <textarea id="observaciones" name="observaciones" rows="4" placeholder="Presiona Enter para hacer saltos de línea. Escriba aquí todas las observaciones adicionales..."></textarea>
       </div>
-
-      <div class="form-group">
-        <label for="cantidadCliente">Cantidad:</label>
-        <input type="text" id="cantidadCliente" name="cantidadCliente">
-      </div>
-
-      <div class="form-group">
-        <label for="fechaF">Fecha:</label>
-        <input type="text" id="fechaF" name="fechaF">
-      </div>
+      <div class="form-group full-width">
+  <label for="firmaAgente">Firma Agente:</label>
+  <input type="text" id="firmaAgente" name="firmaAgente" placeholder="Escriba la firma del agente...">
+</div>
 
       <button type="button" id="submitBtn">Enviar</button>
     </form>
+
+    <!-- Mensajes de estado -->
+    <div id="statusMessage" style="display: none;"></div>
 
     <!-- Controles -->
     <div>
       <button id="downloadBtn">Descargar Imagen</button>
       <button id="adjustPositionsBtn">Ajustar Posiciones (Click en campos)</button>
+      <button onclick="savePositions()">Guardar Posiciones</button>
+<input type="file" id="loadPositionsFile" accept=".json" onchange="loadPositions(event)" style="display:none">
+<button onclick="document.getElementById('loadPositionsFile').click()">Cargar Posiciones</button>
+<button onclick="exportPositionsAsCode()">Exportar como Código</button>
     </div>
+    
+    
+    
   </div>
 
   <script>
@@ -357,12 +429,54 @@
     const ctx = canvas.getContext('2d');
     let img = new Image();
     let positions = [];
-    const TEXT_COLOR = "#001f3f";
-    const HIGHLIGHT_COLOR = "rgba(0, 31, 63, 0.3)";
+    const TEXT_COLOR = "#333333";
     let adjustMode = false;
 
     let albaranNumber = 1;
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxFtupsp1Qxko7AsbRf8GWEWUJSnkY2BLCpCKLJdWjJ0Zugj6vKcaxREcwd-9TbjDpp/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzoKgFckLcfRJgE77-N_H1JJdNz8WoghK2ViVfkpo296rzT82fJJi2myGfBLbOmf2kz/exec';
+
+    // Campos del formulario
+    const fields = [
+      'cliente','telefono','email','pasajero','origen','destino',
+      'fechaSalida','fechaDestino','localizador','dni','m','agente','fecha',
+      'tipoAlbaran','detalles','importe','importeFinanciacion','importeTotal','importeAbonado','importeRestante',
+      'nmaletas','hotelSi','hotelNo','seguroSaludSi', 'seguroSaludNo','fechaFinanciacion','fechaTotal','fechaAbonado','observaciones'
+      ,'firmaAgente'
+    ];
+
+    // Posiciones de los campos
+    const fieldPositions = [
+      { name: 'cliente',         x: 143, y: 152, width: 400, height: 20, fontSize: '14px' },
+      { name: 'telefono',        x: 159, y: 169, width: 200, height: 20, fontSize: '14px' },
+      { name: 'email',           x: 140, y: 187, width: 300, height: 20, fontSize: '14px' },
+      { name: 'pasajero',        x: 167, y: 234, width: 100, height: 20, fontSize: '14px' },
+      { name: 'origen',          x: 412, y: 233, width: 200, height: 20, fontSize: '14px' },
+      { name: 'destino',         x: 618, y: 234, width: 200, height: 20, fontSize: '14px' },
+      { name: 'fechaSalida',     x: 233, y: 251, width: 150, height: 20, fontSize: '14px' },
+      { name: 'fechaDestino',    x: 555, y: 251, width: 150, height: 20, fontSize: '14px' },
+      { name: 'localizador',     x: 414, y: 169, width: 150, height: 20, fontSize: '14px' },
+      { name: 'dni',             x: 618, y: 151, width: 200, height: 20, fontSize: '14px' },
+      { name: 'm',               x: 580, y: 169, width: 100, height: 20, fontSize: '14px' },
+      { name: 'agente',          x: 607, y: 185, width: 200, height: 20, fontSize: '14px' },
+      { name: 'fecha',           x: 676, y: 99, width: 120, height: 20, fontSize: '14px' },
+      { name: 'tipoAlbaran',     x: 160, y: 303, width: 500, height: 20, fontSize: '18px', fontWeight: 'bold' },
+      { name: 'detalles',        x: 158, y: 325, width: 500, height: 60, fontSize: '14px' },
+      { name: 'importe',         x: 686, y: 302, width: 100, height: 20, fontSize: '12px' },
+      { name: 'importeTotal',    x: 687, y: 350, width: 100, height: 20, fontSize: '12px' },
+      { name: 'importeFinanciacion',    x: 686, y: 326, width: 100, height: 20, fontSize: '12px' },
+      { name: 'importeAbonado',  x: 686, y: 373, width: 100, height: 20, fontSize: '12px' },
+      { name: 'importeRestante', x: 687, y: 397, width: 100, height: 20, fontSize: '12px' },
+      { name: 'nmaletas',        x: 357, y: 394, width: 80, height: 20, fontSize: '14px' },
+      { name: 'hotelSi',         x: 251, y: 397, width: 30, height: 20, type: 'checkbox' },
+      { name: 'hotelNo',         x: 269, y: 396, width: 30, height: 20, type: 'checkbox' },
+      { name: 'seguroSaludSi',   x: 459, y: 395, width: 30, height: 20, type: 'checkbox' },
+      { name: 'seguroSaludNo',   x: 477, y: 398, width: 30, height: 20, type: 'checkbox' },
+      { name: 'fechaFinanciacion', x: 490, y: 327, width: 100, height: 20, fontSize: '10px' },
+      { name: 'fechaTotal',      x: 490, y: 350, width: 100, height: 20, fontSize: '10px' },
+      { name: 'fechaAbonado',    x: 490, y: 374, width: 100, height: 20, fontSize: '10px' },
+      { name: 'observaciones',   x: 638, y: 448, width: 500, height: 80, fontSize: '10px' },
+      { name: 'firmaAgente',      x: 546, y: 513, width: 300, height: 20, fontSize: '16px' }
+    ];
 
     // --- SISTEMA DE LOGIN ---
     
@@ -387,6 +501,62 @@
       }
     });
 
+    // Agregar estas funciones después de las otras funciones
+
+// Función para guardar posiciones
+function savePositions() {
+  const positionsData = JSON.stringify(fieldPositions, null, 2);
+  const blob = new Blob([positionsData], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'field_positions.json';
+  link.click();
+  URL.revokeObjectURL(url);
+  showStatusMessage('Posiciones guardadas en archivo JSON');
+}
+
+// Función para cargar posiciones desde archivo
+function loadPositions(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const loadedPositions = JSON.parse(e.target.result);
+        fieldPositions.length = 0; // Limpiar array
+        fieldPositions.push(...loadedPositions); // Cargar nuevas posiciones
+        updatePositions();
+        drawText();
+        showStatusMessage('Posiciones cargadas correctamente');
+      } catch (error) {
+        showStatusMessage('Error al cargar el archivo de posiciones', true);
+      }
+    };
+    reader.readAsText(file);
+  }
+}
+
+// Función para exportar posiciones como código JavaScript
+function exportPositionsAsCode() {
+  const codeString = `const fieldPositions = ${JSON.stringify(fieldPositions, null, 2)};`;
+  const blob = new Blob([codeString], { type: 'text/javascript' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'field_positions.js';
+  link.click();
+  URL.revokeObjectURL(url);
+  showStatusMessage('Código de posiciones exportado');
+}
+
+// Agregar estos botones al HTML después del botón "Ajustar Posiciones"
+/*
+<button onclick="savePositions()">Guardar Posiciones</button>
+<input type="file" id="loadPositionsFile" accept=".json" onchange="loadPositions(event)" style="display:none">
+<button onclick="document.getElementById('loadPositionsFile').click()">Cargar Posiciones</button>
+<button onclick="exportPositionsAsCode()">Exportar como Código</button>
+*/
     // Función para autenticar usuario
     async function authenticateUser(username, password) {
       try {
@@ -426,53 +596,37 @@
         document.getElementById('mainApp').style.display = 'none';
         document.getElementById('loginForm').reset();
         document.getElementById('formulario').reset();
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        img.src = '';
+        positions = [];
       }
     }
 
-    // --- RESTO DE LA APLICACIÓN (código original) ---
+    // --- FUNCIONES DE UTILIDAD ---
 
-    // Campos del formulario
-    const fields = [
-      'cliente','telefono','email','pasajero','origen','destino',
-      'fechaSalida','fechaDestino','localizador','dni','m','agente','fecha',
-      'detalles','importe','importeTotal','importeAbonado','importeRestante',
-      'nmaletas','hotel','seguroSalud','fechaPago','cantidad','seguroBillete',
-      'agenteR','lugarAbonar','cuentaBancaria','agenteRecibe','cantidadCliente','fechaF'
-    ];
+    // Función para mostrar mensajes de estado
+    function showStatusMessage(message, isError = false) {
+      const statusDiv = document.getElementById('statusMessage');
+      statusDiv.textContent = message;
+      statusDiv.className = `status-message ${isError ? 'status-error' : 'status-success'}`;
+      statusDiv.style.display = 'block';
+      
+      setTimeout(() => {
+        statusDiv.style.display = 'none';
+      }, 5000);
+    }
 
-    // Posiciones de los campos
-    const fieldPositions = [
-      { name: 'cliente',         x: 200, y: 235, width: 400, height: 20 },
-      { name: 'telefono',        x: 200, y: 260, width: 200, height: 20 },
-      { name: 'email',           x: 180, y: 289, width: 300, height: 20 },
-      { name: 'pasajero',        x: 210, y: 360, width: 100, height: 20 },
-      { name: 'origen',          x: 585, y: 360, width: 200, height: 20 },
-      { name: 'destino',         x: 904, y: 360, width: 200, height: 20 },
-      { name: 'fechaSalida',     x: 315, y: 385, width: 150, height: 20 },
-      { name: 'fechaDestino',    x: 816, y: 385, width: 150, height: 20 },
-      { name: 'localizador',     x: 585, y: 260, width: 150, height: 20 },
-      { name: 'dni',             x: 904, y: 235, width: 200, height: 20 },
-      { name: 'm',               x: 850, y: 260, width: 100, height: 20 },
-      { name: 'agente',          x: 890, y: 289, width: 200, height: 20 },
-      { name: 'fecha',           x: 1000, y: 155, width: 120, height: 20 },
-      { name: 'detalles',        x: 180, y: 480, width: 500, height: 60 },
-      { name: 'importe',         x: 1020, y: 470, width: 100, height: 20 },
-      { name: 'importeTotal',    x: 1020, y: 550, width: 100, height: 20 },
-      { name: 'importeAbonado',  x: 1020, y: 580, width: 100, height: 20 },
-      { name: 'importeRestante', x: 1020, y: 615, width: 100, height: 20 },
-      { name: 'nmaletas',        x: 500, y: 615, width: 80, height: 20 },
-      { name: 'hotel',           x: 380, y: 615, width: 30, height: 20 },
-      { name: 'seguroSalud',     x: 700, y: 615, width: 30, height: 20 },
-      { name: 'fechaPago',       x: 720, y: 510, width: 100, height: 20 },
-      { name: 'cantidad',        x: 720, y: 550, width: 100, height: 20 },
-      { name: 'seguroBillete',   x: 720, y: 580, width: 30, height: 20 },
-      { name: 'agenteR',         x: 940, y: 700, width: 200, height: 20 },
-      { name: 'lugarAbonar',     x: 940, y: 720, width: 200, height: 20 },
-      { name: 'cuentaBancaria',  x: 940, y: 740, width: 200, height: 20 },
-      { name: 'agenteRecibe',    x: 940, y: 760, width: 200, height: 20 },
-      { name: 'cantidadCliente', x: 940, y: 780, width: 100, height: 20 },
-      { name: 'fechaF',          x: 940, y: 800, width: 120, height: 20 }
-    ];
+    // Función para formatear fecha a DD-MM-YYYY
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}-${month}-${year}`;
+    }
+
+    // --- FUNCIONES PRINCIPALES ---
 
     // Función para obtener el siguiente número de albarán
     async function getNextAlbaranNumber() {
@@ -499,6 +653,59 @@
       }
     }
 
+    // Función para enviar datos a Google Sheets
+    async function sendDataToGoogleSheets() {
+      try {
+        // Preparar los datos del formulario
+        const formData = new FormData();
+        formData.append('action', 'saveData');
+        formData.append('albaranNumber', albaranNumber);
+        formData.append('usuario_registro', currentUser.username);
+        formData.append('nombre_usuario', currentUser.nombre);
+        formData.append('fecha_registro', new Date().toISOString());
+
+        // Preparar datos de hotel
+        let hotelValue = '';
+        if (document.getElementById('hotelSi').checked) hotelValue = 'Sí';
+        else if (document.getElementById('hotelNo').checked) hotelValue = 'No';
+
+        // Preparar datos de seguro de salud
+        let seguroSaludValue = '';
+        if (document.getElementById('seguroSaludSi').checked) seguroSaludValue = 'Sí';
+        else if (document.getElementById('seguroSaludNo').checked) seguroSaludValue = 'No';
+
+        // Agregar todos los campos del formulario
+        fields.forEach(fieldName => {
+          const fieldElement = document.getElementById(fieldName);
+          if (fieldElement) {
+            if (fieldElement.type === 'checkbox') {
+              // Los checkboxes se manejan arriba para hotel y seguro
+              if (fieldName === 'hotelSi' || fieldName === 'hotelNo') {
+                formData.append('hotel', hotelValue);
+              } else if (fieldName === 'seguroSaludSi' || fieldName === 'seguroSaludNo') {
+                formData.append('seguroSalud', seguroSaludValue);
+              }
+            } else if (fieldElement.type === 'date') {
+              formData.append(fieldName, formatDate(fieldElement.value));
+            } else {
+              formData.append(fieldName, fieldElement.value);
+            }
+          }
+        });
+
+        const response = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+        return result;
+      } catch (error) {
+        console.error('Error al enviar datos:', error);
+        return { success: false, message: 'Error de conexión' };
+      }
+    }
+
     // Cargar la imagen seleccionada
     document.getElementById('imageUpload').addEventListener('change', (e) => {
       const file = e.target.files[0];
@@ -518,27 +725,49 @@
       }
     });
 
-    // Función para dibujar los recuadros azules para campos vacíos
-    function drawFieldsWithHighlight() {
-      fieldPositions.forEach(field => {
-        const fieldElement = document.getElementById(field.name);
-        let fieldValue = '';
+    // Función para dibujar una cruz para checkboxes
+    function drawCross(x, y, size = 12) {
+      ctx.strokeStyle = TEXT_COLOR;
+      ctx.lineWidth = 3;
+      
+      ctx.beginPath();
+      ctx.moveTo(x - size/2, y - size/2);
+      ctx.lineTo(x + size/2, y + size/2);
+      ctx.moveTo(x + size/2, y - size/2);
+      ctx.lineTo(x - size/2, y + size/2);
+      ctx.stroke();
+    }
+
+    // Función para manejar saltos de línea en texto
+    function wrapText(text, x, y, maxWidth, lineHeight) {
+      const lines = text.split('\n');
+      let currentY = y;
+      
+      lines.forEach(line => {
+        if (line.trim() === '') {
+          currentY += lineHeight;
+          return;
+        }
         
-        if (fieldElement) {
-          if (fieldElement.type === 'checkbox') {
-            fieldValue = fieldElement.checked ? 'Sí' : '';
+        const words = line.split(' ');
+        let currentLine = '';
+        
+        for (let i = 0; i < words.length; i++) {
+          const testLine = currentLine + words[i] + ' ';
+          const metrics = ctx.measureText(testLine);
+          
+          if (metrics.width > maxWidth && i > 0) {
+            ctx.fillText(currentLine, x, currentY);
+            currentLine = words[i] + ' ';
+            currentY += lineHeight;
           } else {
-            fieldValue = fieldElement.value.trim();
+            currentLine = testLine;
           }
         }
         
-        if (!fieldValue) {
-          ctx.fillStyle = HIGHLIGHT_COLOR;
-          ctx.fillRect(field.x, field.y - 15, field.width, field.height);
-          
-          ctx.strokeStyle = '#001f3f';
-          ctx.lineWidth = 1;
-          ctx.strokeRect(field.x, field.y - 15, field.width, field.height);
+        if (currentLine.trim() !== '') {
+          ctx.fillText(currentLine, x, currentY);
+          currentY += lineHeight;
         }
       });
     }
@@ -549,39 +778,28 @@
       
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
-      
-      drawFieldsWithHighlight();
 
-      ctx.font = "bold 16px Arial";
-      ctx.fillStyle = TEXT_COLOR;
-      ctx.fillText(`${albaranNumber}`, 1060, 77);
+      // Dibujar el número de albarán en ROJO
+      ctx.font = "bold 14px Montserrat, Arial";
+      ctx.fillStyle = "#FF0000";
+      ctx.fillText(`${albaranNumber}`, 716, 47);
 
       positions.forEach(pos => {
         if (pos.text && pos.text.trim() !== '') {
           ctx.fillStyle = TEXT_COLOR;
-          ctx.font = "14px Arial";
           
-          if (pos.isDetails) {
-            const words = pos.text.split(' ');
-            let line = '';
-            let y = pos.y;
-            const maxWidth = 500;
-            const lineHeight = 16;
-            
-            for (let i = 0; i < words.length; i++) {
-              const testLine = line + words[i] + ' ';
-              const metrics = ctx.measureText(testLine);
-              const testWidth = metrics.width;
-              
-              if (testWidth > maxWidth && i > 0) {
-                ctx.fillText(line, pos.x, y);
-                line = words[i] + ' ';
-                y += lineHeight;
-              } else {
-                line = testLine;
-              }
+          const fontSize = pos.fieldData?.fontSize || '16px';
+          const fontWeight = pos.fieldData?.fontWeight || 'normal';
+          ctx.font = `${fontWeight} ${fontSize} Montserrat, Arial`;
+          
+          if (pos.isDetails || pos.isObservations) {
+            const maxWidth = pos.fieldData ? pos.fieldData.width : 500;
+            const lineHeight = 20;
+            wrapText(pos.text, pos.x, pos.y, maxWidth, lineHeight);
+          } else if (pos.isCheckbox) {
+            if (pos.text === 'Sí') {
+              drawCross(pos.x + 15, pos.y - 7);
             }
-            ctx.fillText(line, pos.x, y);
           } else {
             ctx.fillText(pos.text, pos.x, pos.y);
           }
@@ -596,56 +814,67 @@
       fieldPositions.forEach(field => {
         const fieldElement = document.getElementById(field.name);
         let fieldValue = '';
-        
         if (fieldElement) {
           if (fieldElement.type === 'checkbox') {
-            fieldValue = fieldElement.checked ? 'Sí' : '';
+            if (fieldElement.checked) {
+              fieldValue = 'Sí';
+            }
+          } else if (fieldElement.type === 'date') {
+            fieldValue = formatDate(fieldElement.value);
           } else {
-            fieldValue = fieldElement.value.trim();
+            fieldValue = fieldElement.value;
           }
         }
-        
+
+        const isCheckbox = field.type === 'checkbox';
+        const isDetails = field.name === 'detalles';
+        const isObservations = field.name === 'observaciones';
+
         positions.push({
           x: field.x,
           y: field.y,
           text: fieldValue,
-          isDetails: field.name === 'detalles'
+          fieldName: field.name,
+          fieldData: field,
+          isCheckbox: isCheckbox,
+          isDetails: isDetails,
+          isObservations: isObservations
         });
       });
     }
 
-    // Event listeners para actualizar automáticamente
-    document.addEventListener('DOMContentLoaded', () => {
-      fields.forEach(fieldName => {
-        const fieldElement = document.getElementById(fieldName);
-        if (fieldElement) {
-          fieldElement.addEventListener('input', () => {
-            if (img.src) {
-              updatePositions();
-              drawText();
-            }
+    // Event listeners para actualizar el canvas cuando cambian los valores
+    fields.forEach(fieldName => {
+      const fieldElement = document.getElementById(fieldName);
+      if (fieldElement) {
+        fieldElement.addEventListener('input', () => {
+          updatePositions();
+          drawText();
+        });
+        
+        if (fieldElement.type === 'checkbox') {
+          fieldElement.addEventListener('change', () => {
+            updatePositions();
+            drawText();
           });
-          
-          if (fieldElement.type === 'checkbox') {
-            fieldElement.addEventListener('change', () => {
-              if (img.src) {
-                updatePositions();
-                drawText();
-              }
-            });
-          }
         }
-      });
+      }
     });
 
-    // Modo de ajuste de posiciones
+    // Modo ajustar posiciones - Click en canvas para ajustar
     document.getElementById('adjustPositionsBtn').addEventListener('click', () => {
       adjustMode = !adjustMode;
+      const btn = document.getElementById('adjustPositionsBtn');
       if (adjustMode) {
-        alert('Modo de ajuste activado. Haz click en el canvas donde quieres que aparezca cada campo. Presiona ESC para salir.');
+        btn.textContent = 'Finalizar Ajuste';
+        btn.style.backgroundColor = '#ff9800';
         canvas.style.cursor = 'crosshair';
+        showStatusMessage('Modo ajuste activado. Haz click en el canvas para posicionar campos.');
       } else {
+        btn.textContent = 'Ajustar Posiciones (Click en campos)';
+        btn.style.backgroundColor = '#007cba';
         canvas.style.cursor = 'default';
+        showStatusMessage('Modo ajuste desactivado.');
       }
     });
 
@@ -654,107 +883,168 @@
       if (!adjustMode) return;
       
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
       
-      console.log(`Click en: x=${Math.round(x)}, y=${Math.round(y)}`);
-      alert(`Coordenadas: x=${Math.round(x)}, y=${Math.round(y)}\nRevisa la consola para copiar las coordenadas.`);
-    });
-
-    // Salir del modo de ajuste con ESC
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && adjustMode) {
-        adjustMode = false;
-        canvas.style.cursor = 'default';
-      }
-    });
-
-    // Botón enviar
-    document.getElementById('submitBtn').addEventListener('click', async () => {
-      if (!img.src) {
-        alert("Primero debes subir una imagen.");
-        return;
-      }
-
-      const cliente = document.getElementById('cliente').value.trim();
-      if (!cliente) {
-        alert("El campo 'Cliente' es obligatorio.");
-        return;
-      }
-
-      updatePositions();
-      drawText();
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
       
-      const result = await sendDataToGoogleSheets();
+      // Buscar el campo más cercano o crear uno nuevo
+      const fieldName = prompt('¿Qué campo quieres posicionar aquí?\n\nCampos disponibles:\n' + 
+        fieldPositions.map(f => f.name).join(', '));
       
-      if (result.success) {
-        alert(`Datos guardados correctamente. Albarán nº: ${albaranNumber}`);
-        document.getElementById('formulario').reset();
-        await getNextAlbaranNumber();
-        if (img.src) {
+      if (fieldName) {
+        const fieldIndex = fieldPositions.findIndex(f => f.name === fieldName);
+        if (fieldIndex !== -1) {
+          fieldPositions[fieldIndex].x = Math.round(x);
+          fieldPositions[fieldIndex].y = Math.round(y);
           updatePositions();
           drawText();
+          showStatusMessage(`Campo "${fieldName}" posicionado en (${Math.round(x)}, ${Math.round(y)})`);
+        } else {
+          showStatusMessage(`Campo "${fieldName}" no encontrado.`, true);
         }
-      } else {
-        alert('Error al guardar los datos: ' + result.message);
+      }
+    });
+
+    // Manejar mutual exclusión de checkboxes
+    document.getElementById('hotelSi').addEventListener('change', function() {
+      if (this.checked) {
+        document.getElementById('hotelNo').checked = false;
+      }
+      updatePositions();
+      drawText();
+    });
+
+    document.getElementById('hotelNo').addEventListener('change', function() {
+      if (this.checked) {
+        document.getElementById('hotelSi').checked = false;
+      }
+      updatePositions();
+      drawText();
+    });
+
+    document.getElementById('seguroSaludSi').addEventListener('change', function() {
+      if (this.checked) {
+        document.getElementById('seguroSaludNo').checked = false;
+      }
+      updatePositions();
+      drawText();
+    });
+
+    document.getElementById('seguroSaludNo').addEventListener('change', function() {
+      if (this.checked) {
+        document.getElementById('seguroSaludSi').checked = false;
+      }
+      updatePositions();
+      drawText();
+    });
+
+    // Enviar formulario
+    document.getElementById('submitBtn').addEventListener('click', async () => {
+      if (!currentUser) {
+        showStatusMessage('Error: Usuario no autenticado', true);
+        return;
+      }
+
+      if (!img.src) {
+        showStatusMessage('Por favor, carga una imagen primero.', true);
+        return;
+      }
+
+      const clienteField = document.getElementById('cliente');
+      if (!clienteField.value.trim()) {
+        showStatusMessage('Por favor, completa al menos el campo Cliente.', true);
+        clienteField.focus();
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.textContent;
+      
+      try {
+        submitBtn.textContent = 'Enviando...';
+        submitBtn.disabled = true;
+        document.body.classList.add('loading');
+
+        const result = await sendDataToGoogleSheets();
+        
+        if (result.success) {
+          showStatusMessage('Albarán enviado correctamente.');
+          
+          // Incrementar número de albarán y limpiar formulario
+          albaranNumber++;
+          document.getElementById('formulario').reset();
+          updatePositions();
+          drawText();
+          
+          // Obtener el siguiente número del servidor
+          await getNextAlbaranNumber();
+        } else {
+          showStatusMessage(`Error al enviar: ${result.message}`, true);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showStatusMessage('Error de conexión. Inténtalo de nuevo.', true);
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        document.body.classList.remove('loading');
       }
     });
 
     // Descargar imagen
     document.getElementById('downloadBtn').addEventListener('click', () => {
       if (!img.src) {
-        alert("Primero debes subir una imagen antes de descargar.");
+        showStatusMessage('No hay imagen para descargar.', true);
         return;
       }
-
-      const dataURL = canvas.toDataURL("image/png");
+       const clienteNombre = document.getElementById('cliente').value.trim() || 'Cliente';
+      const clienteLimpio = clienteNombre
+    .replace(/[^a-zA-Z0-9\s]/g, '') // Quitar caracteres especiales
+    .replace(/\s+/g, '_') // Reemplazar espacios por guiones bajos
+    .substring(0, 30); // Limitar a 30 caracteres
+     const nombreArchivo = `Albaran_${albaranNumber}_${clienteLimpio}.png`;
       const link = document.createElement('a');
-      link.href = dataURL;
-      link.download = `albaran_${albaranNumber}.png`;
+      link.download = nombreArchivo;
+      link.href = canvas.toDataURL();
       link.click();
+      showStatusMessage('Imagen descargada correctamente.');
     });
 
-    // Función para enviar datos a Google Sheets (actualizada con datos de usuario)
-    async function sendDataToGoogleSheets() {
-      try {
-        const payload = {};
-        
-        fields.forEach(fieldName => {
-          const fieldElement = document.getElementById(fieldName);
-          if (fieldElement) {
-            if (fieldElement.type === 'checkbox') {
-              payload[fieldName] = fieldElement.checked ? 'Sí' : 'No';
-            } else {
-              payload[fieldName] = fieldElement.value.trim();
-            }
-          }
-        });
-
-        // Agregar datos del usuario
-        payload.usuario_registro = currentUser.username;
-        payload.nombre_usuario = currentUser.nombre;
-        payload.fecha_registro = new Date().toLocaleString('es-ES');
-
-        const response = await fetch(WEB_APP_URL, {
-          method: 'POST',
-          body: new URLSearchParams(payload)
-        });
-        
-        const data = await response.json();
-        
-        if (data.status === 'success') {
-          console.log('Datos enviados correctamente:', data);
-          return { success: true, albaranNumber: data.albaranNumber };
-        } else {
-          console.error('Error del servidor:', data);
-          return { success: false, message: data.message || 'Error desconocido' };
-        }
-        
-      } catch (error) {
-        console.error('Error al enviar a Google Sheets:', error);
-        return { success: false, message: error.toString() };
-      }
+    // Función para cargar datos de ejemplo (desarrollo)
+    function loadSampleData() {
+      document.getElementById('cliente').value = 'Juan Pérez García';
+      document.getElementById('telefono').value = '600123456';
+      document.getElementById('email').value = 'juan.perez@email.com';
+      document.getElementById('pasajero').value = '2';
+      document.getElementById('origen').value = 'Madrid';
+      document.getElementById('destino').value = 'París';
+      document.getElementById('fechaSalida').value = new Date().toISOString().split('T')[0];
+      document.getElementById('localizador').value = 'ABC123';
+      document.getElementById('dni').value = '12345678X';
+      document.getElementById('agente').value = 'María López';
+      document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+      document.getElementById('tipoAlbaran').value = 'VIAJE COMBINADO';
+      document.getElementById('detalles').value = 'Viaje de 7 días\nHotel 4 estrellas\nVuelos incluidos';
+      document.getElementById('importe').value = '1200.00';
+      document.getElementById('importeTotal').value = '1200.00';
+      document.getElementById('hotelSi').checked = true;
+      document.getElementById('seguroSaludSi').checked = true;
+      
+      updatePositions();
+      drawText();
     }
+
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', () => {
+      // Establecer fecha actual por defecto
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('fecha').value = today;
+      
+      // Modo desarrollo - descomenta la siguiente línea para cargar datos de ejemplo
+      // loadSampleData();
+    });
   </script>
 </body>
 </html>
