@@ -240,14 +240,34 @@
 
     <!-- Formulario -->
     <form id="formulario">
+
+      <h2>Información Cliente</h2>
+      <div class="form-group">
+        <label for="fecha">Fecha:</label>
+        <input type="date" id="fecha" name="fecha">
+      </div>
+
       <div class="form-group">
         <label for="cliente">Cliente:</label>
         <input type="text" id="cliente" name="cliente" required>
       </div>
-
+      <div class="form-group">
+        <label for="dni">DNI/NIE/PP:</label>
+        <input type="text" id="dni" name="dni">
+      </div>
+      
       <div class="form-group">
         <label for="telefono">Teléfono:</label>
         <input type="text" id="telefono" name="telefono">
+      </div>
+
+       <div class="form-group">
+        <label for="localizador">Localizador:</label>
+        <input type="text" id="localizador" name="localizador">
+      </div>
+      <div class="form-group">
+        <label for="m">M:</label>
+        <input type="text" id="m" name="m">
       </div>
 
       <div class="form-group">
@@ -255,6 +275,11 @@
         <input type="email" id="email" name="email">
       </div>
 
+      <div class="form-group">
+        <label for="agente">Agente:</label>
+        <input type="text" id="agente" name="agente">
+      </div>
+      <h2>Informacion Billete</h2>
       <div class="form-group">
         <label for="pasajero">Nº Pax:</label>
         <input type="text" id="pasajero" name="pasajero">
@@ -280,32 +305,9 @@
         <input type="date" id="fechaDestino" name="fechaDestino">
       </div>
 
-      <div class="form-group">
-        <label for="localizador">Localizador:</label>
-        <input type="text" id="localizador" name="localizador">
-      </div>
-
-      <div class="form-group">
-        <label for="dni">DNI/NIE/PP:</label>
-        <input type="text" id="dni" name="dni">
-      </div>
-
-      <div class="form-group">
-        <label for="m">M:</label>
-        <input type="text" id="m" name="m">
-      </div>
-
-      <div class="form-group">
-        <label for="agente">Agente:</label>
-        <input type="text" id="agente" name="agente">
-      </div>
-
-      <div class="form-group">
-        <label for="fecha">Fecha:</label>
-        <input type="date" id="fecha" name="fecha">
-      </div>
-
-      <div class="form-group full-width">
+      <h2>Detalles albarán<h2>
+      
+       <div class="form-group full-width">
         <label for="tipoAlbaran">Tipo de Albarán:</label>
         <input type="text" id="tipoAlbaran" name="tipoAlbaran">
       </div>
@@ -314,7 +316,23 @@
         <label for="detalles">Detalles:</label>
         <textarea id="detalles" name="detalles" rows="3" placeholder="Presiona Enter para hacer saltos de línea..."></textarea>
       </div>
+<h2>Datos de Financiación</h2>
 
+      <div class="form-group">
+        <label for="fechaFinanciacion">Primer pago financiado:</label>
+        <input type="text" id="fechaFinanciacion" name="fechaFinanciacion">
+      </div>
+
+      <div class="form-group">
+        <label for="fechaTotal">Segundo pago financiado:</label>
+        <input type="text" id="fechaTotal" name="fechaTotal">
+      </div>
+
+      <div class="form-group">
+        <label for="fechaAbonado">Tercer pago financiado:</label>
+        <input type="text" id="fechaAbonado" name="fechaAbonado">
+      </div>
+      <h2>Importes...</h2>
       <div class="form-group">
         <label for="importe">Importe:</label>
         <input type="text" id="importe" name="importe">
@@ -339,11 +357,8 @@
         <label for="importeRestante">Importe Restante:</label>
         <input type="text" id="importeRestante" name="importeRestante">
       </div>
-
-      <div class="form-group">
-        <label for="nmaletas">Nº maletas:</label>
-        <input type="text" id="nmaletas" name="nmaletas">
-      </div>
+<h2>Servicios</h2>
+      
 
       <div class="form-group">
         <div class="checkbox-group">
@@ -360,6 +375,11 @@
       </div>
 
       <div class="form-group">
+        <label for="nmaletas">Nº maletas:</label>
+        <input type="text" id="nmaletas" name="nmaletas">
+      </div>
+
+      <div class="form-group">
         <div class="checkbox-group">
           <input type="checkbox" id="seguroSaludSi" name="seguroSaludSi">
           <label for="seguroSaludSi">Seguro Viaje Salud Sí</label>
@@ -373,22 +393,7 @@
         </div>
       </div>
 
-      <h2>Fecha + importe abonar</h2>
-
-      <div class="form-group">
-        <label for="fechaFinanciacion">Primer pago financiado:</label>
-        <input type="text" id="fechaFinanciacion" name="fechaFinanciacion">
-      </div>
-
-      <div class="form-group">
-        <label for="fechaTotal">Segundo pago financiado:</label>
-        <input type="text" id="fechaTotal" name="fechaTotal">
-      </div>
-
-      <div class="form-group">
-        <label for="fechaAbonado">Tercer pago financiado:</label>
-        <input type="text" id="fechaAbonado" name="fechaAbonado">
-      </div>
+      <h2>Datos de Pago</h2>
 
       <div class="form-group full-width">
         <label for="observaciones">Concepto de Ingreso:</label>
@@ -433,7 +438,7 @@
     let adjustMode = false;
 
     let albaranNumber = 1;
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzoKgFckLcfRJgE77-N_H1JJdNz8WoghK2ViVfkpo296rzT82fJJi2myGfBLbOmf2kz/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxnGn6LMqirpvn7HacPfUfNIuk3T4GkBSBwkC0cuD_y2mVVeMUxIpcC_nb5rBDOTVv_yg/exec';
 
     // Campos del formulario
     const fields = [
