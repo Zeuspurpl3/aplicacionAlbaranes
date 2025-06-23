@@ -297,12 +297,12 @@
 
       <div class="form-group">
         <label for="fechaSalida">Fecha de Salida Origen:</label>
-        <input type="date" id="fechaSalida" name="fechaSalida">
+        <input type="text" id="fechaSalida" name="fechaSalida">
       </div>
 
       <div class="form-group">
         <label for="fechaDestino">Fecha de Salida Destino:</label>
-        <input type="date" id="fechaDestino" name="fechaDestino">
+        <input type="text" id="fechaDestino" name="fechaDestino">
       </div>
 
       <h2>Detalles albarán<h2>
@@ -731,9 +731,9 @@ function exportPositionsAsCode() {
     });
 
     // Función para dibujar una cruz para checkboxes
-    function drawCross(x, y, size = 12) {
+    function drawCross(x, y, size = 10) {
       ctx.strokeStyle = TEXT_COLOR;
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 1;
       
       ctx.beginPath();
       ctx.moveTo(x - size/2, y - size/2);
